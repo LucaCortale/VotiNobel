@@ -1,13 +1,87 @@
 package it.polito.tdp.nobel.model;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class Model {
+import it.polito.tdp.nobel.db.EsameDAO;
 
+public class Model {
 	
-	public Set<Esame> calcolaSottoinsiemeEsami(int numeroCrediti) {
-		System.out.println("TODO!");
-		return null;	
+	private List <Esame> esami;
+	private Set <Esame> migliore;
+	private double mediaMigliore;
+	
+	public Model() {
+		EsameDAO dao = new EsameDAO();
+		this.esami = dao.getTuttiEsami();
+	}
+	
+	public Set<Esame> calcolaSottoinsiemeEsami(int m ) {
+		//ripristino soluzione migliore
+		migliore = new HashSet<Esame>();
+		mediaMigliore = 0.0;
+		
+		Set <Esame> parziale = new HashSet<Esame>();
+		//cerca(parziale,0,m);
+		cerca2(parziale,0,m);
+		
+		return migliore;
+	}
+	
+	private void cerca2(Set<Esame> parziale, int L, int m) {
+		
+		int sommaCrediti = sommaCrediti(parziale);
+		if(sommaCrediti > m) return;
+		
+		if(sommaCrediti == m){
+			double mediaVoti = calcolaMedia(parziale);
+			if(mediaVoti > mediaMigliore) {
+				migliore = new HashSet <Esame> (parziale);
+				mediaMigliore = mediaVoti;
+			}
+			return;
+		}
+		
+		if(L == esami.size()) return;
+		
+		//provo ad aggiungere esami(L)
+		parziale.add(esami.get(L));
+		cerca2(parziale, L+1, m);
+		//provo a 'non aggiungere' esami(L)
+		parziale.remove(esami.get(L));
+		cerca2(parziale,L+1,m);
+		
+			}
+		
+		
+	
+
+	public void cerca(Set<Esame > parziale, int L, int m) {
+		
+		int sommaCrediti = sommaCrediti(parziale);
+		if(sommaCrediti > m) return;
+		
+		if(sommaCrediti == m){
+			double mediaVoti = calcolaMedia(parziale);
+			if(mediaVoti > mediaMigliore) {
+				migliore = new HashSet <Esame> (parziale);
+				mediaMigliore = mediaVoti;
+			}
+			return;
+		}
+		
+		if(L == esami.size()) return;
+		
+		for(Esame e : esami) {
+			if(!parziale.contains(e)) {
+				parziale.add(e);
+				cerca(parziale,L+1,m);
+				parziale.remove(e); // non avessi usato il Set(che non ripete gli oggeti) dovevo fare attenzione a togliere
+				//l ultimo elemento aggiunto. BACKTRAKING
+			}
+		}
+		
 	}
 
 	
